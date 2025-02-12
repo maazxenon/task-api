@@ -1,18 +1,17 @@
 package main
 
 import (
+    "database/sql"
     "encoding/json"
     "fmt"
     "strconv"
+    "log"
     "net/http"
     "github.com/gorilla/mux"
     "github.com/go-playground/validator/v10"
+    _ "github.com/mattn/go-sqlite3"
     "github.com/swaggo/http-swagger"
-    _ "task-api/docs"
-    "task-api/database"
-    "database/sql"
-    "log"
-
+    _ "github.com/maazxenon/task-api/docs"
 )
 
 // Tasl represents a task in the task list
@@ -48,6 +47,31 @@ func validateStatus(fl validator.FieldLevel) bool {
     return false
 }
 
+// DB is a global variable for the SQLite database connection
+var DB *sql.DB
+
+// initDB initializes the SQLite database and creates the tasks table if it doesn't exist
+func initDB() {
+    var err error
+    DB, err = sql.Open("sqlite3", "./app.db")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    sqlStmt := `
+    CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        description TEXT,
+        due_date TEXT,
+        status TEXT
+    );`
+
+    _, err = DB.Exec(sqlStmt)
+    if err != nil {
+        log.Fatalf("Error creating table: %q: %s\n", err, sqlStmt)
+    }
+}
 
 // indexHandler serves the main page and displays all tasks
 // @Summary Get all tasks
@@ -58,7 +82,7 @@ func validateStatus(fl validator.FieldLevel) bool {
 // @Failure 500 {object} ErrorResponse "Internal Server Error"
 // @Router /tasks [get]
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-    rows, err := db.Query("SELECT id, title, description, due_date, status FROM tasks")
+    rows, err := DB.Query("SELECT id, title, description, due_date, status FROM tasks")
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -97,7 +121,7 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
     id := vars["id"]
 
     var task Task
-    err := db.QueryRow("SELECT id, title, description, due_date, status FROM tasks WHERE id = ?", id).Scan(&task.ID, &task.Title, &task.Description, &task.DueDate, &task.Status)
+    err := DB.QueryRow("SELECT id, title, description, due_date, status FROM tasks WHERE id = ?", id).Scan(&task.ID, &task.Title, &task.Description, &task.DueDate, &task.Status)
     if err != nil {
         if err == sql.ErrNoRows {
             http.Error(w, "Task not found", http.StatusNotFound)
@@ -138,7 +162,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
             return
         }
 
-        result, err := db.Exec("INSERT INTO tasks(title, description, due_date, status) VALUES(?, ?, ?, ?)", task.Title, task.Description, task.DueDate, task.Status)
+        result, err := DB.Exec("INSERT INTO tasks(title, description, due_date, status) VALUES(?, ?, ?, ?)", task.Title, task.Description, task.DueDate, task.Status)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
@@ -195,7 +219,7 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    result, err := db.Exec("UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ? WHERE id = ?", task.Title, task.Description, task.DueDate, task.Status, id)
+    result, err := DB.Exec("UPDATE tasks SET title = ?, description = ?, due_date = ?, status = ? WHERE id = ?", task.Title, task.Description, task.DueDate, task.Status, id)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -263,7 +287,7 @@ func deleteTaskByID(id int) error {
     // Return nil if the task is successfully deleted
     // Return other errors if there is an issue with the deletion process
 
-    result, err := db.Exec("DELETE FROM tasks WHERE id = ?", id)
+    result, err := DB.Exec("DELETE FROM tasks WHERE id = ?", id)
     if err != nil {
         return err
     }
@@ -278,7 +302,7 @@ func deleteTaskByID(id int) error {
     }
 
     return nil
-
+    
 }
 
 
@@ -290,8 +314,8 @@ var ErrTaskNotFound = fmt.Errorf("task not found")
 
 
 func main() {
-    db := database.InitDB()
-    defer db.Close()
+    initDB()
+    defer DB.Close()
 
     r := mux.NewRouter()
 

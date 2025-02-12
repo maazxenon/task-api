@@ -1,4 +1,4 @@
-module task-api
+module github.com/maazxenon/task-api
 
 // module module2/app/go-restaurant-api
 go 1.23.6
