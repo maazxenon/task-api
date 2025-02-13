@@ -4,6 +4,7 @@ import (
     "database/sql"
     "log"
     _ "github.com/mattn/go-sqlite3"
+    "github.com/maazxenon/task-api/models"
 )
 
 var DB *sql.DB
@@ -16,14 +17,17 @@ func InitDB() {
         log.Fatal(err)
     }
 
-    sqlStmt := `
-    CREATE TABLE IF NOT EXISTS tasks (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        description TEXT,
-        due_date TEXT,
-        status TEXT
-    );`
+    // sqlStmt := `
+    // CREATE TABLE IF NOT EXISTS tasks (
+    //     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    //     title TEXT,
+    //     description TEXT,
+    //     due_date TEXT,
+    //     status TEXT
+    // );`
+
+
+    sqlStmt := models.TaskTable
 
     _, err = DB.Exec(sqlStmt)
     if err != nil {

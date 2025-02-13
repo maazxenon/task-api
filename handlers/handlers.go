@@ -10,16 +10,11 @@ import (
     _ "github.com/maazxenon/task-api/docs"
     "github.com/maazxenon/task-api/database"
     "log"
+    "github.com/maazxenon/task-api/models"
 )
 
 // Task represents a task in the task list
-type Task struct {
-    ID          int    `json:"id" example:"1"`
-    Title       string `json:"title" example:"Buy groceries" binding:"required"`
-    Description string `json:"description" example:"Milk, Bread, Cheese"`
-    DueDate     string `json:"due_date" example:"2023-12-31"`
-    Status      string `json:"status" example:"pending" validate:"required,status"`
-}
+type Task models.Task
 
 type ErrorResponse struct {
     Message string `json:"message"`

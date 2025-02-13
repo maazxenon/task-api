@@ -33,7 +33,7 @@ func TaskRouter() *gin.Engine {
     r.GET("/", func(c *gin.Context) {
         c.File("./static/index.html")
     })
-    
+
 
 
     // Serve Swagger UI
