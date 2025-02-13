@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Todo List</title>
+
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        background-color: #333;
+        color: white;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+
+    #task-form {
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #333;
+    }
+
+    #task-form h2 {
+        margin: 0;
+    }
+
+    #task-form form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #task-form label {
+        margin-top: 10px;
+    }
+
+    #task-form input {
+        margin-top: 5px;
+        padding: 5px;
+    }
+
+    #task-form button {
+        margin-top: 10px;
+        padding: 5px;
+        background-color: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #task-form button:hover {
+        background-color: #555;
+    }
+
+    #tasks {
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #333;
+    }
+
+    #tasks h2 {
+        margin: 0;
+    }
+
+    #tasks div {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #333;
+    }
+
+    #tasks div h2 {
+        margin: 0;
+    }
+
+    #tasks div p {
+        margin: 0;
+    }
+
+    #tasks div p:last-child {
+        margin-top: 5px;
+    }
+
+    #tasks div p:last-child::before {
+        content: 'Status: ';
+        font-weight: bold;
+    }
+
+    #task-form-by-id {
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #333;
+    }
+
+    #task-form-by-id h2 {
+        margin: 0;
+    }
+
+    #task-form-by-id form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #task-form-by-id label {
+        margin-top: 10px;
+    }
+
+    #task-form-by-id input {
+        margin-top: 5px;
+        padding: 5px;
+    }
+
+    #task-form-by-id button {
+        margin-top: 10px;
+        padding: 5px;
+        background-color: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #task-form-by-id button:hover {
+        background-color: #555;
+    }
+
+
+    /* The Modal (background) */
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Modal Content */
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    /* The Close Button */
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #update-task-modal h2 {
+        margin: 0;
+    }
+
+    #update-task-modal form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #update-task-modal label {
+        margin-top: 10px;
+    }
+
+    #update-task-modal input {
+        margin-top: 5px;
+        padding: 5px;
+    }
+
+    #update-task-modal select {
+        margin-top: 5px;
+        padding: 5px;
+    }
+
+    #update-task-modal button {
+        margin-top: 10px;
+        padding: 5px;
+        background-color: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    #update-task-modal button:hover {
+        background-color: #555;
+    }
+
+
+
+
+
+
+
+
+</style>
+
+
+</head>
+
+<body>
+    <h1>Task Todo List</h1>
+    <div id="task-form">
+        <h2>Create a Task</h2>
+        <form>
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required>
+            <label for="description">Description</label>
+            <input type="text" id="description" name="description" required>
+            <button type="submit">Create Task</button>
+        </form>
+    </div>
+    <!-- fetch by id -->
+    <div id="task-form-by-id">
+        <h2>Get a Task by ID</h2>
+        <form>
+            <label for="id">ID</label>
+            <input type="text" id="id" name="id" required>
+            <button type="submit">Get Task</button>
+        </form>
+    </div>
+    
+    <div id="tasks"></div>
+
+
+    <!-- modal to update a task -->
+
+    <div id="update-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update Task</h2>
+            <form>
+                <label for="title">Title</label>
+                <input type="text" id="update-title" name="title" required>
+                <label for="description">Description</label>
+                <input type="text" id="update-description" name="description" required>
+                <label for="status">Status</label>
+                <select id="update-status" name="status">
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button type="submit">Update Task</button>
+            </form>
+        </div>
+
+
+    <script>
+        fetch('/tasks')
+
+        // add button so that each task can be deleted by id
+        // after deleting the task the task should be removed from the list
+            .then(response => response.json())
+            .then(tasks => {
+                const tasksDiv = document.getElementById('tasks');
+                tasks.forEach(task => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.innerHTML = `
+                        <h2>${task.title}</h2>
+                        <p>${task.description}</p>
+                        <p>Status: ${task.status}</p>
+
+                        <button onclick="fetch('/tasks/${task.id}', { method: 'DELETE' })">Delete Task</button>
+
+                        <button onclick="document.getElementById('update-task-modal').style.display = 'block'
+                            document.getElementById('update-title').value = '${task.title}'
+                            document.getElementById('update-description').value = '${task.description}'
+                            document.getElementById('update-status').value = '${task.status}'
+                        ">Update Task</button>
+                        
+
+                    `;
+                    tasksDiv.appendChild(taskDiv);
+                });
+            });
+
+        document.getElementById('task-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            fetch('/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, description, status: 'pending' })
+            })
+                .then(response => response.json())
+                .then(task => {
+                    const tasksDiv = document.getElementById('tasks');
+                    const taskDiv = document.createElement('div');
+                    taskDiv.innerHTML = `
+                        <h2>${task.title}</h2>
+                        <p>${task.description}</p>
+                        <p>Status: ${task.status}</p>
+
+                        <button onclick="fetch('/tasks/${task.id}', { method: 'DELETE' })">Delete Task</button>
+                    `;
+                    tasksDiv.appendChild(taskDiv);
+                });
+        });
+
+        document.getElementById('task-form-by-id').addEventListener('submit', event => {
+            event.preventDefault();
+            const id = document.getElementById('id').value;
+            fetch(`/tasks/${id}`)
+                .then(response => response.json())
+                .then(task => {
+                    const tasksDiv = document.getElementById('tasks');
+                    const taskDiv = document.createElement('div');
+                    taskDiv.innerHTML = `
+                        <h2>${task.title}</h2>
+                        <p>${task.description}</p>
+                        <p>Status: ${task.status}</p>
+
+                        <button onclick="fetch('/tasks/${task.id}', { method: 'DELETE' })">Delete Task</button>
+                    `;
+                    // Clear the tasksDiv before adding the new taskDiv.
+                    
+                    tasksDiv.innerHTML = '';
+                    tasksDiv.appendChild(taskDiv);
+                });
+        });
+
+        // modal to update a task
+        const updateTaskModal = document.getElementById('update-task-modal');
+        const updateTitleInput = document.getElementById('update-title');
+        const updateDescriptionInput = document.getElementById('update-description');
+        const updateStatusSelect = document.getElementById('update-status');
+
+        document.getElementById('tasks').addEventListener('click', event => {
+            if (event.target.tagName === 'H2') {
+                const taskDiv = event.target.parentElement;
+                const title = taskDiv.querySelector('h2').textContent;
+                const description = taskDiv.querySelector('p').textContent;
+                const status = taskDiv.querySelector('p:last-child').textContent.split(': ')[1];
+                updateTitleInput.value = title;
+                updateDescriptionInput.value = description;
+                updateStatusSelect.value = status;
+                updateTaskModal.style.display = 'block';
+            }
+        });
+
+        document.querySelector('.close').addEventListener('click', () => {
+            updateTaskModal.style.display = 'none';
+        });
+
+        updateTaskModal.addEventListener('click', event => {
+            if (event.target === updateTaskModal) {
+                updateTaskModal.style.display = 'none';
+            }
+        });
+
+
+        updateTaskModal.querySelector('form').addEventListener('submit', event => {
+            event.preventDefault();
+            const title = updateTitleInput.value;
+            const description = updateDescriptionInput.value;
+            const status = updateStatusSelect.value;
+            fetch('/tasks', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, description, status })
+            })
+                .then(response => response.json())
+                .then(task => {
+                    const tasksDiv = document.getElementById('tasks');
+                    const taskDiv = document.createElement('div');
+                    taskDiv.innerHTML = `
+                        <h2>${task.title}</h2>
+                        <p>${task.description}</p>
+                        <p>Status: ${task.status}</p>
+
+                        <button onclick="fetch('/tasks/${task.id}', { method: 'DELETE' })">Delete Task</button>
+                    `;
+                    tasksDiv.innerHTML = '';
+                    tasksDiv.appendChild(taskDiv);
+                    updateTaskModal.style.display = 'none';
+                });
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>
