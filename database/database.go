@@ -17,16 +17,6 @@ func InitDB() {
         log.Fatal(err)
     }
 
-    // sqlStmt := `
-    // CREATE TABLE IF NOT EXISTS tasks (
-    //     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    //     title TEXT,
-    //     description TEXT,
-    //     due_date TEXT,
-    //     status TEXT
-    // );`
-
-
     sqlStmt := models.TaskTable
 
     _, err = DB.Exec(sqlStmt)

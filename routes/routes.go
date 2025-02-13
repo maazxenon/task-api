@@ -6,9 +6,6 @@ import (
     "github.com/maazxenon/task-api/handlers"
     "time"
     "github.com/gin-contrib/cors"
-    // "net/http"
-
-
 )
 
 // TaskRouter returns a new router
